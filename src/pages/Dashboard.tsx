@@ -6,7 +6,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Workout, WorkoutLog, Streak, DailyChallenge } from '../lib/supabase';
 
-type Props = { onNavigate: (page: string) => void };
+type Props = { onNavigate: (page: string) => void; onStartWorkout?: (workout: Workout) => void };
 
 const MOTIVATIONAL_QUOTES = [
   { text: "The only bad workout is the one that didn't happen.", author: "Unknown" },
@@ -191,7 +191,7 @@ function LogWorkoutModal({ onClose, onLogged }: { onClose: () => void; onLogged:
   );
 }
 
-export default function Dashboard({ onNavigate }: Props) {
+export default function Dashboard({ onNavigate, onStartWorkout }: Props) {
   const { user, profile } = useAuth();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [recentLogs, setRecentLogs] = useState<WorkoutLog[]>([]);
@@ -387,7 +387,7 @@ export default function Dashboard({ onNavigate }: Props) {
                       <span className="capitalize">{workout.difficulty}</span>
                     </div>
                     <button
-                      onClick={() => setShowLogModal(true)}
+                      onClick={() => { if (onStartWorkout) onStartWorkout(workout); else setShowLogModal(true); }}
                       className="mt-3 w-full flex items-center justify-center gap-2 py-2 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/20 rounded-xl text-primary-400 text-xs font-medium transition-all duration-200"
                     >
                       <Play size={12} /> Start Workout

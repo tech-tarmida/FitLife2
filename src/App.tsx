@@ -11,12 +11,15 @@ import NotesPage from './pages/NotesPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import AdminDashboard from './pages/AdminDashboard';
+import WorkoutSessionPage from './pages/WorkoutSessionPage';
+import { Workout } from './lib/supabase';
 
-type Page = 'landing' | 'login' | 'signup' | 'dashboard' | 'explore' | 'progress' | 'nutrition' | 'notes' | 'profile' | 'settings' | 'admin';
+type Page = 'landing' | 'login' | 'signup' | 'dashboard' | 'explore' | 'progress' | 'nutrition' | 'notes' | 'profile' | 'settings' | 'admin' | 'workout-session';
 
 function AppContent() {
   const { user, loading } = useAuth();
   const [page, setPage] = useState<Page>('landing');
+  const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
 
   useEffect(() => {
     if (!loading) {
@@ -34,7 +37,15 @@ function AppContent() {
       return;
     }
     setPage(p as Page);
+    if (p !== 'workout-session') {
+      setActiveWorkout(null);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const startWorkoutSession = (workout: Workout) => {
+    setActiveWorkout(workout);
+    setPage('workout-session');
   };
 
   if (loading) {
@@ -52,7 +63,7 @@ function AppContent() {
     );
   }
 
-  const showNavbar = !['login', 'signup'].includes(page);
+  const showNavbar = !['login', 'signup', 'workout-session'].includes(page);
 
   return (
     <div className="min-h-screen bg-dark-950">
@@ -60,14 +71,17 @@ function AppContent() {
       <main>
         {page === 'landing' && <LandingPage onNavigate={navigate} />}
         {(page === 'login' || page === 'signup') && <AuthPage onNavigate={navigate} />}
-        {page === 'dashboard' && user && <Dashboard onNavigate={navigate} />}
-        {page === 'explore' && <ExplorePage onNavigate={navigate} />}
+        {page === 'dashboard' && user && <Dashboard onNavigate={navigate} onStartWorkout={startWorkoutSession} />}
+        {page === 'explore' && <ExplorePage onNavigate={navigate} onStartWorkout={startWorkoutSession} />}
         {page === 'progress' && user && <ProgressPage onNavigate={navigate} />}
         {page === 'nutrition' && <NutritionPage onNavigate={navigate} />}
         {page === 'notes' && user && <NotesPage onNavigate={navigate} />}
         {page === 'profile' && user && <ProfilePage onNavigate={navigate} />}
         {page === 'settings' && user && <SettingsPage onNavigate={navigate} />}
         {page === 'admin' && user && <AdminDashboard onNavigate={navigate} />}
+        {page === 'workout-session' && activeWorkout && user && (
+          <WorkoutSessionPage workout={activeWorkout} onNavigate={navigate} />
+        )}
       </main>
     </div>
   );

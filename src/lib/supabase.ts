@@ -36,6 +36,7 @@ export type Workout = {
   video_url: string;
   is_premium: boolean;
   is_published: boolean;
+  duration_tier: string;
   created_by: string | null;
   view_count: number;
   like_count: number;
@@ -54,7 +55,16 @@ export type Exercise = {
   image_url: string;
   video_url: string;
   calories_per_minute: number;
+  animation_data: ExerciseAnimationData | null;
   created_at: string;
+};
+
+export type ExerciseAnimationData = {
+  type: string;
+  label: string;
+  instruction: string;
+  cycleMs: number;
+  bodyParts: Record<string, any>;
 };
 
 export type WorkoutLog = {
@@ -162,4 +172,42 @@ export type NoteAttachment = {
   file_type: string;
   storage_path: string;
   created_at: string;
+};
+
+export type WorkoutExercise = {
+  id: string;
+  workout_id: string;
+  exercise_id: string;
+  sets: number;
+  reps: number | null;
+  duration_seconds: number | null;
+  rest_seconds: number;
+  order_index: number;
+  exercises?: Exercise;
+};
+
+export type WorkoutSession = {
+  id: string;
+  user_id: string;
+  workout_id: string;
+  status: 'in_progress' | 'paused' | 'completed' | 'abandoned';
+  current_exercise_index: number;
+  started_at: string;
+  completed_at: string | null;
+  total_duration_seconds: number;
+  calories_burned: number;
+  paused_at: string | null;
+  total_paused_seconds: number;
+};
+
+export type SessionExerciseLog = {
+  id: string;
+  session_id: string;
+  exercise_id: string;
+  order_index: number;
+  duration_seconds: number;
+  reps_completed: number;
+  sets_completed: number;
+  skipped: boolean;
+  completed_at: string | null;
 };

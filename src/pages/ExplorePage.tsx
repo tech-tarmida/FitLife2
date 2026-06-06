@@ -6,7 +6,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Workout } from '../lib/supabase';
 
-type Props = { onNavigate: (page: string) => void };
+type Props = { onNavigate: (page: string) => void; onStartWorkout?: (workout: Workout) => void };
 
 const CATEGORIES = [
   { id: 'all', label: 'All' },
@@ -35,9 +35,10 @@ const DIFFICULTY_STYLE: Record<string, string> = {
   advanced: 'text-red-400 bg-red-500/10 border-red-500/20',
 };
 
-function WorkoutDetailModal({ workout, onClose, onLog, isSaved, onToggleSave }: {
+function WorkoutDetailModal({ workout, onClose, onStartWorkout, onLog, isSaved, onToggleSave }: {
   workout: Workout;
   onClose: () => void;
+  onStartWorkout: () => void;
   onLog: () => void;
   isSaved: boolean;
   onToggleSave: () => void;
@@ -98,18 +99,26 @@ function WorkoutDetailModal({ workout, onClose, onLog, isSaved, onToggleSave }: 
           ))}
         </div>
 
-        <button
-          onClick={() => { onLog(); onClose(); }}
-          className="btn-primary w-full flex items-center justify-center gap-2"
-        >
-          <Play size={16} /> Start & Log Workout
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => { onStartWorkout(); onClose(); }}
+            className="btn-primary w-full flex items-center justify-center gap-2"
+          >
+            <Play size={16} /> Start Workout
+          </button>
+          <button
+            onClick={() => { onLog(); onClose(); }}
+            className="btn-secondary w-full flex items-center justify-center gap-2 text-sm py-2.5"
+          >
+            Quick Log (Skip Session)
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function ExplorePage({ onNavigate }: Props) {
+export default function ExplorePage({ onNavigate, onStartWorkout }: Props) {
   const { user } = useAuth();
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [exercises, setExercises] = useState<any[]>([]);
@@ -219,6 +228,7 @@ export default function ExplorePage({ onNavigate }: Props) {
         <WorkoutDetailModal
           workout={selectedWorkout}
           onClose={() => setSelectedWorkout(null)}
+          onStartWorkout={() => { if (onStartWorkout) onStartWorkout(selectedWorkout); }}
           onLog={() => { setShowLogModal(true); }}
           isSaved={savedIds.includes(selectedWorkout.id)}
           onToggleSave={() => toggleSave(selectedWorkout.id)}
@@ -417,7 +427,7 @@ export default function ExplorePage({ onNavigate }: Props) {
                     </span>
                   </div>
                   <button
-                    onClick={e => { e.stopPropagation(); setSelectedWorkout(workout); }}
+                    onClick={e => { e.stopPropagation(); if (onStartWorkout) onStartWorkout(workout); }}
                     className="w-full py-2 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/20 rounded-xl text-primary-400 text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1.5"
                   >
                     <Play size={11} /> Start
